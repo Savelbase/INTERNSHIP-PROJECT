@@ -1,0 +1,1 @@
+alter table clients alter column accession_date_time type timestamp;

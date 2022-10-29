@@ -1,0 +1,77 @@
+server:
+  forward-headers-strategy: framework
+
+eureka:
+  client:
+    enabled: false
+
+spring:
+  application:
+    name: auth-service
+  output:
+    ansi:
+      enabled: ALWAYS
+  datasource:
+    driver-class-name: org.h2.Driver
+    hikari:
+      leak-detection-threshold: 30000
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: validate
+  h2:
+    console:
+      enabled: true
+  flyway:
+    locations:
+      - classpath:{vendor}/db/migration
+      - classpath:{vendor}/db/testdata
+    baseline-on-migrate: true
+  cloud:
+    config:
+      enabled: false
+    discovery:
+      enabled: false
+  kafka:
+    consumer:
+      group-id: auth-service
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+kafka:
+  topic:
+    sign-up: rmn-mobile.sign-up
+    client-status: rmn-mobile.client-status
+    user-edit: rmn-mobile.user-edit
+    user-delete: rmn-mobile.user-delete
+
+authentication:
+  token:
+    issuer: rmn_mobile_auth
+    type: Bearer
+    # 1 hour
+    accessTokenExpirationSec: 3600
+    # 8 hours
+    refreshTokenExpirationSec: 28800
+
+logging:
+  pattern:
+    console: "%clr(%d{HH:mm:ss.SSS}){blue} %clr(---){faint} %clr([%15.15t]){yellow} %clr(:){red} %clr(%m){faint}%n"
+---
+spring:
+  config:
+    activate:
+      on-profile: integration-test
+  datasource:
+    url: jdbc:h2:mem:test_db;DATABASE_TO_LOWER=TRUE
+    username: h2
+    password: h2
+  kafka:
+    bootstrap-servers: localhost:9092, 10.10.15.217:9092
+
+authentication:
+  token:
+    key: test

@@ -1,0 +1,1 @@
+alter table client add column bank_client bool default false;

@@ -1,0 +1,22 @@
+package com.rmn.toolkit.user.command.security;
+
+public enum AuthorityType {
+    AUTHORIZATION ,
+    REGISTRATION,
+    USER_EDIT,
+    USER_VIEW,
+    DELETE_USER,
+    PASSWORD_RECOVERY,
+    PIN_CODE_RESET,
+    UPLOAD_IMAGE,
+    VIEW_IMAGE,
+    CREDIT_EDIT,
+    CREDIT_VIEW,
+    EDIT_CREDIT_ORDER_STATUS,
+    CARD_EDIT,
+    CARD_VIEW,
+    APPROVE_BANK_CLIENT,
+    EDIT_CARD_ORDER_STATUS,
+    DEPOSIT_VIEW
+}
+

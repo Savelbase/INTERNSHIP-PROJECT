@@ -1,0 +1,129 @@
+server:
+  forward-headers-strategy: framework
+
+#kafka settings :
+spring:
+  output:
+    ansi:
+      enabled: ALWAYS
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      leak-detection-threshold: 30000
+  jpa:
+    database: POSTGRESQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    locations:
+      - classpath:db/migration
+      - classpath:db/testdata
+    baseline-on-migrate: true
+  kafka:
+    consumer:
+      group-id: user-query
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+kafka:
+  topic:
+    sign-up: rmn-mobile.sign-up
+    client-status: rmn-mobile.client-status
+    approved-bank-client: rmn-mobile.approved-bank-client
+    user-edit: rmn-mobile.user-edit
+    user-delete: rmn-mobile.user-delete
+    notification: rmn-mobile.notification
+
+eureka:
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoint:
+    restart:
+      enabled: true
+    shutdown:
+      enabled: true
+    env:
+      post:
+        enabled: true
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+      distribution:
+        percentiles-histogram:
+          "[http.server.requests]": true
+
+#authentication settings
+authentication:
+  token:
+    issuer: rmn_mobile_user_query
+    type: Bearer
+    # 1 hour
+    accessTokenExpirationSec: 3600
+
+logging:
+  pattern:
+    console: "%clr(%d{HH:mm:ss.SSS}){blue} %clr(---){faint} %clr([%15.15t]){yellow} %clr(:){red} %clr(%m){faint}%n"
+---
+server:
+  port: ${USER_QUERY_SERVICE_PORT:8093}
+
+spring:
+  config:
+    activate:
+      on-profile: localhost
+  datasource:
+    url: jdbc:postgresql://localhost:${RMN_DB_PORT:5432}/${RMN_USERS_QUERY_DB:rmn_mobile_users_query}
+    username: ${RMN_DB_USER:rmn_mobile}
+    password: ${RMN_DB_PASSWORD:rmn_mobile}
+    driverClassName: org.postgresql.Driver
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST:::1}:${KAFKA_PORT:9092}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:${EUREKA_PORT:9761}/eureka/
+
+authentication:
+  token:
+    key: secret
+---
+server:
+  port: 0
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:postgresql://${RMN_DB_HOST}:${RMN_DB_PORT:5432}/${RMN_USERS_QUERY_DB}
+    username: ${RMN_DB_USER}
+    password: ${RMN_DB_PASSWORD}
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST}:${EUREKA_PORT}/eureka/
+
+authentication:
+  token:
+    key: ${JWT_KEY}
+
+logging:
+  file:
+    name: ${RMN_LOG_DIR:log}/user-query-service.log

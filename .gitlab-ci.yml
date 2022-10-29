@@ -1,0 +1,179 @@
+stages:
+  - build
+  - sonarQube
+  - deploy
+  - cleanup
+
+variables:
+  PROGECT: rmt-mobile-new-backend
+  APP1: config-server
+  APP2: service-discovery
+  APP3: web-api-gateway
+  APP4: authorization
+  APP5: user-command-application
+  APP6: user-query-application
+  APP7: user-registration-application
+  APP8: bank-client-application
+  APP9: media-storage-command-application
+  APP10: media-storage-query-application
+  APP11: credits-command-application
+  APP12: credits-query-application
+  APP13: bank-info-application
+  APP14: cards-command-application
+  APP15: cards-query-application
+  APP16: deposits-command-application
+  APP17: deposits-query-application
+  DOCKER_BUILDKIT: 1
+
+build:
+  stage: build
+  tags: [shell-dev]
+  before_script:
+    - echo "$AND_DOCKER_REGISTRY_RW_PASS" | docker login -u nexus "$AND_DOCKER_REGISTRY" --password-stdin
+  script:
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP1:dev -f ./CI/api-config-server.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP1:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP2:dev -f ./CI/service-discovery.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP2:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP3:dev -f ./CI/web-api-gateway.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP3:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP4:dev -f ./CI/authorization.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP4:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP5:dev -f ./CI/user-command-application.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP5:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP6:dev -f ./CI/user-query-application.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP6:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP7:dev -f ./CI/user-registration-application.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP7:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP8:dev -f ./CI/bank-client-application.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP8:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP9:dev -f ./CI/media-storage-command-application.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP9:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP10:dev -f ./CI/media-storage-query-application.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP10:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP11:dev -f ./CI/credits-command-application.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP11:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP12:dev -f ./CI/credits-query-application.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP12:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP13:dev -f ./CI/bank-info-application.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP13:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP14:dev -f ./CI/cards-command-application.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP14:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP15:dev -f ./CI/cards-query-application.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP15:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP16:dev -f ./CI/deposits-command-application.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP16:dev
+    - docker build --tag $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP17:dev -f ./CI/deposits-query-application.Dockerfile --build-arg BUILDKIT_INLINE_CACHE=1 .
+    - docker push $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP17:dev
+  artifacts:
+    name: "Maven artifacts from $CI_PROJECT_NAME on $CI_COMMIT_REF_SLUG"
+    paths:
+      - target/*.jar
+      - target/site/jacoco/jacoco.xml
+    expire_in: 1 day
+  only:
+    - fix-sonar
+
+sonarQube:
+  stage: sonarQube
+  image: sonarsource/sonar-scanner-cli:4.6
+  variables:
+    SONAR_PROJECT_BASE_DIR: "$CI_PROJECT_DIR"
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: 0
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - .sonar/cache
+  script:
+    - pwd && ls -l
+    - cd target && ls -l
+    - cd ..
+    - sonar-scanner 
+      -Dsonar.projectKey=rmt-mobile-new-backend
+      -Dsonar.host.url=https://sonarqube8.andersenlab.com
+      -Dsonar.links.ci=$CI_PIPELINE_URL
+      -Dsonar.login=dacb6bfd005eebdd5ca11d6df1a825f352306770
+      -Dsonar.sources=${CI_PROJECT_DIR}/src/main
+      -Dsonar.tests=${CI_PROJECT_DIR}/src/test
+      -Dsonar.java.binaries=${CI_PROJECT_DIR}/target
+      -Dsonar.scm.exclusions.disabled=true
+      -Dsonar.coverage.jacoco.xmlReportPaths=${CI_PROJECT_DIR}/target/site/jacoco/jacoco.xml
+  allow_failure: true
+  only:
+    - fix-sonar
+
+deploy:
+  stage: deploy
+  tags: [shell-dev]
+  variables:
+    COMPOSE_PROJECT_NAME: $PROGECT
+  before_script:
+    - echo "$AND_DOCKER_REGISTRY_RO_PASS" | docker login -u nexus-ro "$AND_DOCKER_REGISTRY" --password-stdin
+    - cp $AND_ENV .env
+  script:
+    - docker stop $PROGECT-$APP1-dev || true
+    - docker rm $PROGECT-$APP1-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP1:dev || true
+    - docker stop $PROGECT-$APP2-dev || true
+    - docker rm $PROGECT-$APP2-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP2:dev || true
+    - docker stop $PROGECT-$APP3-dev || true
+    - docker rm $PROGECT-$APP3-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP3:dev || true
+    - docker stop $PROGECT-$APP4-dev || true
+    - docker rm $PROGECT-$APP4-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP4:dev || true
+    - docker stop $PROGECT-$APP5-dev || true
+    - docker rm $PROGECT-$APP5-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP5:dev || true
+    - docker stop $PROGECT-$APP6-dev || true
+    - docker rm $PROGECT-$APP6-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP6:dev || true
+    - docker stop $PROGECT-$APP7-dev || true
+    - docker rm $PROGECT-$APP7-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP7:dev || true
+    - docker stop $PROGECT-$APP8-dev || true
+    - docker rm $PROGECT-$APP8-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP8:dev || true
+    - docker stop $PROGECT-$APP9-dev || true
+    - docker rm $PROGECT-$APP9-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP9:dev || true
+    - docker stop $PROGECT-$APP10-dev || true
+    - docker rm $PROGECT-$APP10-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP10:dev || true
+    - docker stop $PROGECT-$APP11-dev || true
+    - docker rm $PROGECT-$APP11-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP11:dev || true
+    - docker stop $PROGECT-$APP12-dev || true
+    - docker rm $PROGECT-$APP12-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP12:dev || true
+    - docker stop $PROGECT-$APP13-dev || true
+    - docker rm $PROGECT-$APP13-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP13:dev || true
+    - docker stop $PROGECT-$APP14-dev || true
+    - docker rm $PROGECT-$APP14-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP14:dev || true
+    - docker stop $PROGECT-$APP15-dev || true
+    - docker rm $PROGECT-$APP15-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP15:dev || true
+    - docker stop $PROGECT-$APP16-dev || true
+    - docker rm $PROGECT-$APP16-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP16:dev || true
+    - docker stop $PROGECT-$APP17-dev || true
+    - docker rm $PROGECT-$APP17-dev || true
+    - docker rmi -f $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP17:dev || true
+    - docker image prune -f || true
+    - docker-compose -f docker-compose.yaml pull
+    - docker-compose -f docker-compose.yaml up --force-recreate -d
+  only:
+    - develop
+
+cleanup:
+  stage: cleanup
+  tags: [shell-dev]
+  script:
+    - docker system prune -f --filter "label!=keep"
+  when: always
+  only:
+    - develop

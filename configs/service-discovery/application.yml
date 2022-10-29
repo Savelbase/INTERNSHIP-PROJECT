@@ -1,0 +1,52 @@
+server:
+  port: ${EUREKA_PORT:9761}
+  forward-headers-strategy: native
+
+eureka:
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+
+management:
+  endpoint:
+    restart:
+      enabled: true
+    shutdown:
+      enabled: true
+    env:
+      post:
+        enabled: true
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+      distribution:
+        percentiles-histogram:
+          "[http.server.requests]": true
+---
+spring:
+  config:
+    activate:
+      on-profile: localhost
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:${EUREKA_PORT:9761}/eureka/
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST}:${EUREKA_PORT}/eureka/
+logging:
+  file:
+    name: ${RMN_LOG_DIR:log}/service-discovery.log

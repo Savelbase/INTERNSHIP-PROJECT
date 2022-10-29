@@ -1,0 +1,64 @@
+server:
+  port: ${CONFIG_SERVER_PORT_A:9149}
+
+spring:
+  application:
+    name: config-server
+  output:
+    ansi:
+      enabled: ALWAYS
+
+management:
+  endpoint:
+    restart:
+      enabled: true
+    shutdown:
+      enabled: true
+    env:
+      post:
+        enabled: true
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+      distribution:
+        percentiles-histogram:
+          "[http.server.requests]": true
+
+logging:
+  pattern:
+    console: "%clr(%d{HH:mm:ss.SSS}){blue} %clr(---){faint} %clr([%15.15t]){yellow} %clr(:){red} %clr(%m){faint}%n"
+---
+spring:
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: file:///${GIT_REPO_URI_LOCAL}/configs/{application}
+  config:
+    activate:
+      on-profile: native
+---
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://git.andersenlab.com/Andersen/rmt-mobile-new/rmt-mobile-new-backend.git
+          username: ${GIT_REPO_USERNAME}
+          password: ${GIT_REPO_PASSWORD}
+          search-paths: configs/{application}
+        default-label: develop
+  config:
+    activate:
+      on-profile: dev
+
+logging:
+  file:
+    name: ${RMN_LOG_DIR:log}/config-server.log

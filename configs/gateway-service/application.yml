@@ -1,0 +1,324 @@
+server:
+  port: ${GATEWAY_PORT:9769}
+  forward-headers-strategy: native
+
+eureka:
+  instance:
+    prefer-ip-address: true
+management:
+  endpoint:
+    restart:
+      enabled: true
+    shutdown:
+      enabled: true
+    env:
+      post:
+        enabled: true
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+      distribution:
+        percentiles-histogram:
+          "[http.server.requests]": true
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: openapi
+          uri: http://localhost:${server.port}
+          predicates:
+            - Path=/v3/api-docs/**
+          filters:
+            - RewritePath=/v3/api-docs/(?<path>.*), /$\{path}/v3/api-docs
+        - id: sign-up-service-openapi
+          uri: lb://user-registration-service
+          predicates:
+            - Path=/sign-up/v3/api-docs
+            - Method=GET
+          filters:
+            - RewritePath=/sign-up/v3/api-docs, /v3/api-docs
+        - id: sign-up-service-post-phone
+          uri: lb://user-registration-service
+          predicates:
+            - Path=/sign-up/api/v**/sign-up/clients/phone, /api/v**/sign-up/clients/phone
+            - Method=POST
+          filters:
+            - RewritePath= ^/sign-up/(?<path>.*), /$\{path}
+        - id: sign-up-service
+          uri: lb://user-registration-service
+          predicates:
+            - Path=/sign-up/api/v**/sign-up/** , /api/v**/sign-up/**
+            - Method=POST, PATCH
+          filters:
+            - AuthFilter
+            - RewritePath= ^/sign-up/(?<path>.*), /$\{path}
+        - id: sign-up-service-get-privacy-policy
+          uri: lb://user-registration-service
+          predicates:
+            - Path=/sign-up/api/v**/rules/privacy-policy ,/api/v**/rules/privacy-policy
+            - Method=GET
+          filters:
+            - RewritePath= ^/sign-up/(?<path>.*), /$\{path}
+        - id: sign-up-service-get
+          uri: lb://user-registration-service
+          predicates:
+            - Path=/sign-up/api/v**/rules/** , /api/v**/rules/**
+            - Method=GET
+          filters:
+            - AuthFilter
+            - RewritePath= ^/sign-up/(?<path>.*), /$\{path}
+        - id: auth-service-openapi
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/v3/api-docs
+            - Method=GET
+          filters:
+            - RewritePath=/auth/v3/api-docs, /v3/api-docs
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/api/v**/auth/** , /api/v**/auth/**
+            - Method=POST
+          filters:
+            - RewritePath= ^/auth/(?<path>.*), /$\{path}
+        - id: user-command-service-openapi
+          uri: lb://user-command-application
+          predicates:
+            - Path=/user-command/v3/api-docs
+            - Method=GET
+          filters:
+            - RewritePath=/user-command/v3/api-docs, /v3/api-docs
+        - id: user-command-application
+          uri: lb://user-command-application
+          predicates:
+            - Path=/api/v**/users/** , /user-command/api/v**/users/**
+            - Method=POST, PUT, PATCH, DELETE
+          filters:
+            - AuthFilter
+            - RewritePath=^/user-command/(?<path>.*), /$\{path}
+        - id: user-command-password-recovery-code-generation
+          uri: lb://user-command-application
+          predicates:
+            - Path=/api/v**/password/recovery/code/generation, /user-command/api/v**/password/recovery/code/generation
+            - Method=POST
+          filters:
+            - RewritePath= ^/user-command/(?<path>.*), /$\{path}
+        - id: user-command-password-recovery
+          uri: lb://user-command-application
+          predicates:
+            - Path=/api/v**/password/recovery/**, /user-command/api/v**/password/recovery/**
+            - Method=POST, PATCH
+          filters:
+            - AuthFilter
+            - RewritePath=^/user-command/(?<path>.*), /$\{path}
+        - id: user-command-pin-reset-code-generation
+          uri: lb://user-command-application
+          predicates:
+            - Path=/api/v**/pin/reset/code/generation, /user-command/api/v**/pin/reset/code/generation
+            - Method=POST
+          filters:
+            - RewritePath= ^/user-command/(?<path>.*), /$\{path}
+        - id: user-command-pin-reset
+          uri: lb://user-command-application
+          predicates:
+            - Path=/api/v**/pin/reset/**, /user-command/api/v**/pin/reset/**
+            - Method=POST, PATCH
+          filters:
+            - AuthFilter
+            - RewritePath=^/user-command/(?<path>.*), /$\{path}
+        - id: user-query-service-openapi
+          uri: lb://user-query-application
+          predicates:
+            - Path=/user-query/v3/api-docs
+            - Method=GET
+          filters:
+            - RewritePath=/user-query/v3/api-docs, /v3/api-docs
+        - id: user-query-application
+          uri: lb://user-query-application
+          predicates:
+            - Path=/api/v**/users/** , /user-query/api/v**/users/**
+            - Method=GET
+          filters:
+            - AuthFilter
+            - RewritePath= ^/user-query/(?<path>.*), /$\{path}
+        - id: media-storage-command-service-openapi
+          uri: lb://media-storage-command-service
+          predicates:
+            - Path=/media-storage-command/v3/api-docs
+            - Method=GET
+          filters:
+            - RewritePath=/media-storage-command/v3/api-docs, /v3/api-docs
+        - id: media-storage-command-service
+          uri: lb://media-storage-command-service
+          predicates:
+            - Path=/api/v**/clients/avatar, /media-storage-command/api/v**/clients/avatar
+            - Method=POST
+          filters:
+            - AuthFilter
+            - RewritePath= ^/media-storage-command/(?<path>.*), /$\{path}
+        - id: media-storage-query-service-openapi
+          uri: lb://media-storage-query-service
+          predicates:
+            - Path=/media-storage-query/v3/api-docs
+            - Method=GET
+          filters:
+            - RewritePath=/media-storage-query/v3/api-docs, /v3/api-docs
+        - id: media-storage-query-service
+          uri: lb://media-storage-query-service
+          predicates:
+            - Path=/api/v**/clients/*/avatar, /media-storage-query/api/v**/clients/*/avatar
+            - Method=GET
+          filters:
+            - AuthFilter
+            - RewritePath= ^/media-storage-query/(?<path>.*), /$\{path}
+        - id: credits-command-service-openapi
+          uri: lb://credits-command-application
+          predicates:
+            - Path=/credits-command/v3/api-docs
+            - Method=GET
+          filters:
+            - RewritePath=/credits-command/v3/api-docs, /v3/api-docs
+        - id: credits-command-application
+          uri: lb://credits-command-application
+          predicates:
+            - Path=/api/v**/credits/** , /credits-command/api/v**/credits/**
+            - Method=POST, PATCH
+          filters:
+            - AuthFilter
+            - RewritePath= ^/credits-command/(?<path>.*), /$\{path}
+        - id: credits-query-service-openapi
+          uri: lb://credits-query-application
+          predicates:
+            - Path=/credits-query/v3/api-docs
+            - Method=GET
+          filters:
+            - RewritePath=/credits-query/v3/api-docs, /v3/api-docs
+        - id: credits-query-application
+          uri: lb://credits-query-application
+          predicates:
+            - Path=/api/v**/credits/** , /credits-query/api/v**/credits/**
+            - Method=GET
+          filters:
+            - AuthFilter
+            - RewritePath= ^/credits-query/(?<path>.*), /$\{path}
+        - id: credits-query-get-clients-credits-orders
+          uri: lb://credits-query-application
+          predicates:
+            - Path=/api/v**/clients/*/credits/orders , /credits-query/api/v**/clients/*/credits/orders
+            - Method=GET
+          filters:
+            - AuthFilter
+            - RewritePath= ^/credits-query/(?<path>.*), /$\{path}
+        - id: bank-info-service-openapi
+          uri: lb://bank-info-service
+          predicates:
+            - Path=/bank-info/v3/api-docs
+            - Method=GET
+          filters:
+            - RewritePath=/bank-info/v3/api-docs, /v3/api-docs
+        - id: department-service
+          uri: lb://bank-info-service
+          predicates:
+            - Path=/api/v**/departments/** , /bank-info/api/v**/departments/**
+            - Method=GET
+          filters:
+            - RewritePath= ^/bank-info/(?<path>.*), /$\{path}
+        - id: contact-service
+          uri: lb://bank-info-service
+          predicates:
+            - Path=/api/v**/contacts/** , /bank-info/api/v**/contacts/**
+            - Method=GET
+          filters:
+            - RewritePath= ^/bank-info/(?<path>.*), /$\{path}
+        - id: cards-query-service-openapi
+          uri: lb://cards-query-application
+          predicates:
+            - Path=/cards-query/v3/api-docs
+            - Method=GET
+          filters:
+            - RewritePath=/cards-query/v3/api-docs, /v3/api-docs
+        - id: cards-query-application
+          uri: lb://cards-query-application
+          predicates:
+            - Path=/api/v**/cards/** , /cards-query/api/v**/cards/**
+            - Method=GET
+          filters:
+            - AuthFilter
+            - RewritePath= ^/cards-query/(?<path>.*), /$\{path}
+        - id: cards-query-get-clients-cards-orders
+          uri: lb://cards-query-application
+          predicates:
+            - Path=/api/v**/clients/*/cards/orders , /cards-query/api/v**/clients/*/cards/orders
+            - Method=GET
+          filters:
+            - AuthFilter
+            - RewritePath= ^/cards-query/(?<path>.*), /$\{path}
+
+        - id: cards-command-service-openapi
+          uri: lb://cards-command-application
+          predicates:
+            - Path=/cards-command/v3/api-docs
+            - Method=GET
+          filters:
+            - RewritePath=/cards-command/v3/api-docs, /v3/api-docs
+        - id: cards-command-application
+          uri: lb://cards-command-application
+          predicates:
+            - Path=/api/v**/cards/** , /cards-command/api/v**/cards/**
+            - Method=POST, PATCH
+          filters:
+            - AuthFilter
+            - RewritePath= ^/cards-command/(?<path>.*), /$\{path}
+        - id: deposits-query-service-openapi
+          uri: lb://deposits-query-application
+          predicates:
+            - Path=/deposits-query/v3/api-docs
+            - Method=GET
+          filters:
+            - RewritePath=/deposits-query/v3/api-docs, /v3/api-docs
+        - id: deposits-query-application
+          uri: lb://deposits-query-application
+          predicates:
+            - Path=/api/v**/deposits/** , /deposits-query/api/v**/deposits/**
+            - Method=GET
+          filters:
+            - AuthFilter
+            - RewritePath= ^/deposits-query/(?<path>.*), /$\{path}
+---
+spring:
+  config:
+    activate:
+      on-profile: localhost
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:${EUREKA_PORT:9761}/eureka/
+authentication:
+  token:
+    key: secret
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST}:${EUREKA_PORT}/eureka/
+authentication:
+  token:
+    key: ${JWT_KEY}
+logging:
+  file:
+    name: ${RMN_LOG_DIR:log}/gateway-service.log

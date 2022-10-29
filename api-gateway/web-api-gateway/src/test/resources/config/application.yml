@@ -1,0 +1,27 @@
+server:
+  forward-headers-strategy: framework
+eureka:
+  client:
+    enabled: false
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    config:
+      enabled: false
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: user-query-application
+          uri: lb://user-query-application
+          predicates:
+            - Path=/api/v**/users/**
+            - Method=GET
+          filters:
+            - AuthFilter
+authentication:
+  token:
+    type: Bearer
+    key: secret

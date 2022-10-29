@@ -1,0 +1,189 @@
+version: "3"
+
+services:
+
+  api-gateway-config-server:
+    container_name: $PROGECT-$APP1-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP1:dev
+    env_file:
+      - .env
+    ports:
+      - 9149:9149
+    volumes:
+      - /home/RMTM_LOG_DIR:/log/config-server.log
+
+  api-service-discovery:
+    container_name: $PROGECT-$APP2-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP2:dev
+    env_file:
+      - .env
+    ports:
+      - 9761:9761
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  api-web-api-gateway:
+    container_name: $PROGECT-$APP3-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP3:dev
+    env_file:
+      - .env
+    ports:
+      - 9769:9769
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  authorization:
+    container_name: $PROGECT-$APP4-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP4:dev
+    env_file:
+      - .env
+    ports:
+      - 8085:8085
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  user-command-application:
+    container_name: $PROGECT-$APP5-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP5:dev
+    env_file:
+      - .env
+    ports:
+      - 8092:8092
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  user-query-application:
+    container_name: $PROGECT-$APP6-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP6:dev
+    env_file:
+      - .env
+    ports:
+      - 8093:8093
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  user-registration-application:
+    container_name: $PROGECT-$APP7-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP7:dev
+    env_file:
+      - .env
+    ports:
+      - 8091:8091
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  bank-client-application:
+    container_name: $PROGECT-$APP8-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP8:dev
+    env_file:
+      - .env
+    ports:
+      - 8094:8094
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  media-storage-command-application:
+    container_name: $PROGECT-$APP9-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP9:dev
+    env_file:
+      - .env
+    ports:
+      - 8095:8095
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  media-storage-query-application:
+    container_name: $PROGECT-$APP10-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP10:dev
+    env_file:
+      - .env
+    ports:
+      - 8096:8096
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  credits-command-application:
+    container_name: $PROGECT-$APP11-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP11:dev
+    env_file:
+      - .env
+    ports:
+      - 8097:8097
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  credits-query-application:
+    container_name: $PROGECT-$APP12-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP12:dev
+    env_file:
+      - .env
+    ports:
+      - 8098:8098
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  bank-info-application:
+    container_name: $PROGECT-$APP13-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP13:dev
+    env_file:
+      - .env
+    ports:
+      - 9091:9091
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  cards-command-application:
+    container_name: $PROGECT-$APP14-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP14:dev
+    env_file:
+      - .env
+    ports:
+      - 8099:8099
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  cards-query-application:
+    container_name: $PROGECT-$APP15-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP15:dev
+    env_file:
+      - .env
+    ports:
+      - 8100:8100
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  deposits-command-application:
+    container_name: $PROGECT-$APP16-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP16:dev
+    env_file:
+      - .env
+    ports:
+      - 8101:8101
+    depends_on:
+      - api-gateway-config-server
+    restart: always
+
+  deposits-query-application:
+    container_name: $PROGECT-$APP17-dev
+    image: $AND_DOCKER_REGISTRY_NAME/$PROGECT-$APP17:dev
+    env_file:
+      - .env
+    ports:
+      - 8102:8102
+    depends_on:
+      - api-gateway-config-server
+    restart: always

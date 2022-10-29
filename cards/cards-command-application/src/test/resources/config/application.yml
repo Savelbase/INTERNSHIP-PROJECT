@@ -1,0 +1,91 @@
+server:
+  forward-headers-strategy: framework
+
+eureka:
+  client:
+    enabled: false
+
+spring:
+  application:
+    name: card-command-application
+  output:
+    ansi:
+      enabled: ALWAYS
+  datasource:
+    driver-class-name: org.h2.Driver
+    hikari:
+      leak-detection-threshold: 30000
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
+  flyway:
+    locations:
+      - classpath:{vendor}/db/migration
+      - classpath:{vendor}/db/testdata
+    baseline-on-migrate: true
+  cloud:
+    config:
+      enabled: false
+    discovery:
+      enabled: false
+  kafka:
+    consumer:
+      group-id: cards-command
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+kafka:
+  topic:
+    sign-up: rmn-mobile.sign-up
+    client-status: rmn-mobile.client-status
+    user-delete: rmn-mobile.user-delete
+    card: rmn-mobile.card
+
+authentication:
+  token:
+    issuer: rmn_mobile_card_command
+    type: Bearer
+    # 1 hour
+    accessTokenExpirationSec: 3600
+
+logging:
+  pattern:
+    console: "%clr(%d{HH:mm:ss.SSS}){blue} %clr(---){faint} %clr([%15.15t]){yellow} %clr(:){red} %clr(%m){faint}%n"
+---
+spring:
+  config:
+    activate:
+      on-profile: integration-test
+  datasource:
+    url: jdbc:h2:mem:test_db
+    username: h2
+    password: h2
+  kafka:
+    bootstrap-servers: localhost:9092, 10.10.15.217:9092
+
+authentication:
+  token:
+    key: test
+
+cryptography:
+  privateKey:
+    "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBANtXHgrJ9NXbt8pSLfi+57Hz2zZsNUXvHMmyztpFlcP8wOKLns/MsXQk\
+    0G9N80er5aawS2JbH07oYVEpKN7je3ol7olFvoBCyppEGUfJ8f6Bgirrwk4j0MC5bZ+jA2GDjbj6kl5Vg2TOGf6Bv1ea9FCG36nJkzfjJei8z6I\
+    7VwO1AgMBAAECgYAfN6lzcKXzkBd66LJZTlZsmd/vwXvdjbgjrtrI7xFvOPh85dE/EwuIk7rEtKv03e7MCBhakcyFbwZ2xixmeKr4hoR5uRdGfa2WYAx\
+    WT/uG9qpZp8R8EYBMdDje6T5h28ArwMvjlWVW88ri21aLDL4N9BMtmqqVy965A6LmO1kzEQJBAPnjl4QeO5fj8K1nLedvCPDB+c89dZUG2Az3x4Dd3X\
+    AtNqExnDTr/ZKXOFpEbwxKZz2qVY9Hah5+G+gEGxNMsu0CQQDgtEcjX8E7NWAV1QsYtSGqWVgKOPaHZU7MdABysRMa/gwrMlZQDBRGLY0MF47X1Mav5J\
+    Qqs6VM+lUk8F0d0ZLpAkEAoTE5lKT35hPINeL/znFmf/9wiElp5rbieQMAc1UquWjA+5wH2m98Q6o+VKQeSfxYuoN8646ymnbYw4KagImSRQJANkFRK+l\
+    i7rjkimD2XPDfQBJyf4VhgS+k5xjbQtYeltXgek2dKZbBDnDRLapCgzqM/stiOy1FLGEFTfX7hcekgQJBAOTsAoN5hMpkF5GCWVwkj5a6DhQk+jKp3+NP\
+    QRUJbzKSrOcDxi34Z0Kk62VuH4t09fa8PYILu0erecPzDGVqEeM="
+  publicKey:
+    "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDbVx4KyfTV27fKUi34vuex89s2bDVF7xzJss7aRZXD/MDii57PzLF0JNBvTfNHq+Wms\
+    EtiWx9O6GFRKSje43t6Je6JRb6AQsqaRBlHyfH+gYIq68JOI9DAuW2fowNhg424+pJeVYNkzhn+gb9XmvRQht+pyZM34yXovM+iO1cDtQIDAQAB"

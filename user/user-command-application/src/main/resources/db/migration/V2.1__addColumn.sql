@@ -1,0 +1,1 @@
+alter table user_profile add column pin_code text;

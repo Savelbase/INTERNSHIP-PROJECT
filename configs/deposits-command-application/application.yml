@@ -1,0 +1,143 @@
+server:
+  forward-headers-strategy: framework
+
+spring:
+  output:
+    ansi:
+      enabled: ALWAYS
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      leak-detection-threshold: 30000
+  jpa:
+    database: POSTGRESQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    locations:
+      - classpath:db/migration
+      - classpath:db/testdata
+    baseline-on-migrate: true
+  kafka:
+    consumer:
+      group-id: deposits-command
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+kafka:
+  topic:
+    sign-up: rmn-mobile.sign-up
+    client-status: rmn-mobile.client-status
+    user-delete: rmn-mobile.user-delete
+    deposit: rmn-mobile.deposit
+
+eureka:
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoint:
+    restart:
+      enabled: true
+    shutdown:
+      enabled: true
+    env:
+      post:
+        enabled: true
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+      distribution:
+        percentiles-histogram:
+          "[http.server.requests]": true
+
+#Аутентификация
+authentication:
+  token:
+    issuer: rmn_mobile_deposits_command
+    type: Bearer
+      # 1 hour
+    accessTokenExpirationSec: 3600
+
+#Смена цвета логов
+logging:
+  pattern:
+    console: "%clr(%d{HH:mm:ss.SSS}){blue} %clr(---){faint} %clr([%15.15t]){yellow} %clr(:){red} %clr(%m){faint}%n"
+---
+server:
+  port: ${DEPOSITS_COMMAND_SERVICE_PORT:8101}
+spring:
+  config:
+    activate:
+      on-profile: localhost
+  datasource:
+    url: jdbc:postgresql://localhost:${RMN_DB_PORT:5432}/${RMN_DEPOSITS_COMMAND_DB:rmn_mobile_deposits_command}
+    username: ${RMN_DB_USER:rmn_mobile}
+    password: ${RMN_DB_PASSWORD:rmn_mobile}
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST:::1}:${KAFKA_PORT:9092}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:${EUREKA_PORT:9761}/eureka/
+
+authentication:
+  token:
+    key: secret
+
+cryptography:
+  privateKey:
+    "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBANtXHgrJ9NXbt8pSLfi+57Hz2zZsNUXvHMmyztpFlcP8wOKLns/MsXQk\
+    0G9N80er5aawS2JbH07oYVEpKN7je3ol7olFvoBCyppEGUfJ8f6Bgirrwk4j0MC5bZ+jA2GDjbj6kl5Vg2TOGf6Bv1ea9FCG36nJkzfjJei8z6I\
+    7VwO1AgMBAAECgYAfN6lzcKXzkBd66LJZTlZsmd/vwXvdjbgjrtrI7xFvOPh85dE/EwuIk7rEtKv03e7MCBhakcyFbwZ2xixmeKr4hoR5uRdGfa2WYAx\
+    WT/uG9qpZp8R8EYBMdDje6T5h28ArwMvjlWVW88ri21aLDL4N9BMtmqqVy965A6LmO1kzEQJBAPnjl4QeO5fj8K1nLedvCPDB+c89dZUG2Az3x4Dd3X\
+    AtNqExnDTr/ZKXOFpEbwxKZz2qVY9Hah5+G+gEGxNMsu0CQQDgtEcjX8E7NWAV1QsYtSGqWVgKOPaHZU7MdABysRMa/gwrMlZQDBRGLY0MF47X1Mav5J\
+    Qqs6VM+lUk8F0d0ZLpAkEAoTE5lKT35hPINeL/znFmf/9wiElp5rbieQMAc1UquWjA+5wH2m98Q6o+VKQeSfxYuoN8646ymnbYw4KagImSRQJANkFRK+l\
+    i7rjkimD2XPDfQBJyf4VhgS+k5xjbQtYeltXgek2dKZbBDnDRLapCgzqM/stiOy1FLGEFTfX7hcekgQJBAOTsAoN5hMpkF5GCWVwkj5a6DhQk+jKp3+NP\
+    QRUJbzKSrOcDxi34Z0Kk62VuH4t09fa8PYILu0erecPzDGVqEeM="
+  publicKey:
+    "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDbVx4KyfTV27fKUi34vuex89s2bDVF7xzJss7aRZXD/MDii57PzLF0JNBvTfNHq+Wms\
+    EtiWx9O6GFRKSje43t6Je6JRb6AQsqaRBlHyfH+gYIq68JOI9DAuW2fowNhg424+pJeVYNkzhn+gb9XmvRQht+pyZM34yXovM+iO1cDtQIDAQAB"
+---
+server:
+  port: 0
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:postgresql://${RMN_DB_HOST}:${RMN_DB_PORT:5432}/${RMN_DEPOSITS_COMMAND_DB:rmn_mobile_deposits_command}
+    username: ${RMN_DB_USER}
+    password: ${RMN_DB_PASSWORD}
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST}:${EUREKA_PORT}/eureka/
+
+authentication:
+  token:
+    key: ${JWT_KEY}
+
+logging:
+  file:
+    name: ${RMN_LOG_DIR:log}/deposits-command-service.log
+
+cryptography:
+  privateKey : ${PRIVATE_KEY}
+  publicKey : ${PUBLIC_KEY}

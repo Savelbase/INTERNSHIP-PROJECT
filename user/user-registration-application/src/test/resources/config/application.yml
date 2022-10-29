@@ -1,0 +1,83 @@
+server:
+  forward-headers-strategy: framework
+
+eureka:
+  client:
+    enabled: false
+
+spring:
+  application:
+    name: user-registration-service
+  output:
+    ansi:
+      enabled: ALWAYS
+  datasource:
+    driver-class-name: org.h2.Driver
+    hikari:
+      leak-detection-threshold: 30000
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
+  flyway:
+    locations:
+      - classpath:{vendor}/db/migration
+      - classpath:{vendor}/db/testdata
+    baseline-on-migrate: true
+  cloud:
+    config:
+      enabled: false
+    discovery:
+      enabled: false
+  kafka:
+    consumer:
+      group-id: client-sign-up
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+kafka:
+  topic:
+    bank-client: rmn-mobile.bank-client
+    sign-up: rmn-mobile.sign-up
+    user-delete: rmn-mobile.user-delete
+
+authentication:
+  token:
+    issuer: rmn_mobile_user_registration
+    type: Bearer
+    # 20 minute
+    accessTokenExpirationSec: 1200
+  verificationCode:
+    # 2 minute
+    expirationSec: 120
+    # 30 sec
+    timeCounterBeforeMaxAttemptSec: 30
+    # 10 minute
+    timeCounterAfterMaxAttemptSec: 600
+
+logging:
+  pattern:
+    console: "%clr(%d{HH:mm:ss.SSS}){blue} %clr(---){faint} %clr([%15.15t]){yellow} %clr(:){red} %clr(%m){faint}%n"
+---
+spring:
+  config:
+    activate:
+      on-profile: integration-test
+  datasource:
+    url: jdbc:h2:mem:test_db
+    username: h2
+    password: h2
+  kafka:
+    bootstrap-servers: localhost:9092, 10.10.15.217:9092
+
+authentication:
+  token:
+    key: test

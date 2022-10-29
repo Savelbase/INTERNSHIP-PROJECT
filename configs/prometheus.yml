@@ -1,0 +1,102 @@
+scrape_configs:
+  - job_name: 'api-gateway-config-server'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['api-gateway-config-server']
+
+  - job_name: 'api-service-discovery'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['api-service-discovery']
+
+  - job_name: 'api-web-api-gateway'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['api-web-api-gateway']
+
+  - job_name: 'authorization'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['authorization']
+
+  - job_name: 'user-command-application'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['user-command-application']
+
+  - job_name: 'user-query-application'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['user-query-application']
+
+  - job_name: 'user-registration-application'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['user-registration-application']
+
+  - job_name: 'bank-client-application'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['bank-client-application']
+
+  - job_name: 'media-storage-command-application'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['media-storage-command-application']
+
+  - job_name: 'media-storage-query-application'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['media-storage-query-application']
+
+  - job_name: 'credits-command-application'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['credits-command-application']
+
+  - job_name: 'credits-query-application'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['credits-query-application']
+
+  - job_name: 'bank-info-application'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['bank-info-application']
+
+  - job_name: 'cards-command-application'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['cards-command-application']
+
+  - job_name: 'cards-query-application'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['cards-query-application']
+
+  - job_name: 'deposits-command-application'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['deposits-command-application']
+
+  - job_name: 'deposits-query-application'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['deposits-query-application']

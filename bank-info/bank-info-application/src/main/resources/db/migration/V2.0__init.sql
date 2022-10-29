@@ -1,0 +1,1 @@
+alter table department add coordinates varchar(100) , add city varchar(50);
