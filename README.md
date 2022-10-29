@@ -1,3 +1,6 @@
+# This is a project that I wrote in a team with two interns during an internship at Andersen
+
+
 # RMT-Mobile-New-Backend
 
 This repository is created for the backend development of the RMN mobile project
