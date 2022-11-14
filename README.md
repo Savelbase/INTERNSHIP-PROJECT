@@ -1,4 +1,4 @@
-# This is a project that I wrote in a team with two interns during an internship at Andersen
+ The company switched to fintech projects, and we started implementing a banking application. First, we wrote services for storing user data, then registration and authorization services were added. Data between services was synchronized using kafka. I was engaged in writing services that were responsible for changing data. The project was written according to the CQRS pattern. This is a project that I wrote in a team with two interns during an internship at Andersen
 
 
 # RMT-Mobile-New-Backend
